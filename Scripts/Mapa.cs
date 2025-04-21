@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class Mapa : MonoBehaviour
 {
 
@@ -28,14 +28,32 @@ public class Mapa : MonoBehaviour
     public int cantidadOroSpawneadosDer;
 
     public int verifSpawnDeMapa;
+
+    public GameObject carga;
+    public GameObject textoCarga;
+    public Image sliderCarga;
+    public int puntoQuitarCarga;
     void Start()
     {
-       
+
+        Invoke(nameof(QuitarCarga), 2f);
      //   Invoke(nameof(Arboleda), 0.2f);
      //   Invoke(nameof(Arboleda2), 0.4f);
        // Invoke(nameof(Arboleda3), 0.6f);
        // Invoke(nameof(Arboleda4), 0.8f);
       //  Invoke(nameof(VerifMapeado), 1f);
+    }
+    void QuitarCarga()
+    {
+        textoCarga.SetActive(false);
+        puntoQuitarCarga = 1;
+        Invoke(nameof(QuitarCarga2), 1.75f);
+    }
+    void QuitarCarga2()
+    {
+      
+        carga.SetActive(false);
+     
     }
     void VerifMapeado()
     {
@@ -100,7 +118,10 @@ public class Mapa : MonoBehaviour
 
     void Update()
     {
-      
+        if (puntoQuitarCarga >= 1)
+        {
+            sliderCarga.GetComponent<Image>().fillAmount -= 0.0085f;
+        }
     }
     //void Arboleda()
     //{

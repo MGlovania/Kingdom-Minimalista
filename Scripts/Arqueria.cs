@@ -19,29 +19,80 @@ public class Arqueria : MonoBehaviour
 
     public int posIz;
     public int posDer;
+
+    public bool esArqueria;
+    public bool esTorreMago;
     void Start()
     {
         nivelCasa = 1;
       
          manager = GameObject.FindGameObjectWithTag("Manager");
-   
-        cantidadArquerosMax = manager.GetComponent<Recursos>().cantidadMaximaArquerosEnArqueria;
-        manager.GetComponent<Recursos>().cantidadArquerosMax += cantidadArquerosMax;
+
+        if (esArqueria)
+        {
+            cantidadArquerosMax = manager.GetComponent<Recursos>().cantidadMaximaArquerosEnArqueria;
+            manager.GetComponent<Recursos>().cantidadArquerosMax += cantidadArquerosMax;
+        }
+        else if (esTorreMago)
+        {
+            cantidadArquerosMax = manager.GetComponent<Recursos>().cantidadMaximaMagosEnTorre;
+            manager.GetComponent<Recursos>().cantidadMagosMax += cantidadArquerosMax;
+        }
+
+
+
         Invoke(nameof(Verif), 1f);
     }
 
     void Verif()
     {
-        if (manager.GetComponent<Recursos>().arqueriaAumentarNumero >= 1 && cantidadArquerosActual < cantidadArquerosMax)
+        if (esArqueria)
         {
-            cantidadArquerosActual += 1;
-            manager.GetComponent<Recursos>().arqueriaAumentarNumero -= 1;
+            if (manager.GetComponent<Recursos>().cantidadAldeanosAlmacenados >= 1 && cantidadArquerosActual < cantidadArquerosMax)
+            {
+                manager.GetComponent<Recursos>().cantidadAldeanosAlmacenados -= 1;
+                cantidadArquerosActual += 1;
+                manager.GetComponent<Recursos>().cantidadAldeanosAlmacenadosPuestosEnArqueria += 1;
+            }
+            else
+            {
+                if (manager.GetComponent<Recursos>().arqueriaAumentarNumero >= 1 && cantidadArquerosActual < cantidadArquerosMax)
+                {
+                    cantidadArquerosActual += 1;
+                    manager.GetComponent<Recursos>().arqueriaAumentarNumero -= 1;
+                }
+                if (manager.GetComponent<Recursos>().arqueriaDisminuirNumero >= 1 && cantidadArquerosActual > 0)
+                {
+                    cantidadArquerosActual -= 1;
+                    manager.GetComponent<Recursos>().arqueriaDisminuirNumero -= 1;
+                }
+            }
+          
         }
-        if (manager.GetComponent<Recursos>().arqueriaDisminuirNumero >= 1 && cantidadArquerosActual > 0)
+       else if (esTorreMago)
         {
-            cantidadArquerosActual -= 1;
-            manager.GetComponent<Recursos>().arqueriaDisminuirNumero -= 1;
+            if (manager.GetComponent<Recursos>().cantidadAldeanosAlmacenados >= 1 && cantidadArquerosActual < cantidadArquerosMax)
+            {
+                manager.GetComponent<Recursos>().cantidadAldeanosAlmacenados -= 1;
+                cantidadArquerosActual += 1;
+                manager.GetComponent<Recursos>().cantidadAldeanosAlmacenadosPuestosTorreDeMagos += 1;
+            }
+            else
+            {
+                if (manager.GetComponent<Recursos>().magosAumentarNumero >= 1 && cantidadArquerosActual < cantidadArquerosMax)
+                {
+                    cantidadArquerosActual += 1;
+                    manager.GetComponent<Recursos>().magosAumentarNumero -= 1;
+                }
+                if (manager.GetComponent<Recursos>().magosDisminuirNumero >= 1 && cantidadArquerosActual > 0)
+                {
+                    cantidadArquerosActual -= 1;
+                    manager.GetComponent<Recursos>().magosDisminuirNumero -= 1;
+                }
+            }
+           
         }
+
         Invoke(nameof(Verif), 1f);
     }
     void Update()

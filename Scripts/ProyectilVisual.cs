@@ -8,20 +8,19 @@ public class ProyectilVisual : MonoBehaviour
     public Proyectil proyectil;
 
     public int puntoUpdatear;
+
+    public Rigidbody2D rb;
     void OnEnable()
     {
-        puntoUpdatear = 1;
-       Invoke(nameof(Punto), 0.06f);
-       Invoke(nameof(UpdateProyectilRotation), 0.06f);
+    
+      
+    // Invoke(nameof(Punto), 0.2f);
     }
     void Punto()
     {
-        if (puntoUpdatear >= 1)
-        {
-            Invoke(nameof(Punto), 0.06f);
-            Invoke(nameof(UpdateProyectilRotation), 0.06f);
-        }
-   
+        puntoUpdatear = 1;
+      
+      
     }
     private void OnDisable()
     {
@@ -30,12 +29,18 @@ public class ProyectilVisual : MonoBehaviour
 
     void Update()
     {
-       // UpdateProyectilRotation();
+      //  if (puntoUpdatear >= 1)
+       // {
+        
+        //    UpdateProyectilRotation();
+       // }
+        float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
+        proyectilVisual.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
     void UpdateProyectilRotation()
     {
-        Vector3 proyectilMoveDir = proyectil.GetProyectilMoveDir();
-
-        proyectilVisual.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(proyectilMoveDir.y, proyectilMoveDir.x) * Mathf.Rad2Deg);
+      //  Vector3 proyectilMoveDir = proyectil.GetProyectilMoveDir();
+       
+     //   proyectilVisual.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(proyectilMoveDir.y, proyectilMoveDir.x) * Mathf.Rad2Deg);
     }
 }

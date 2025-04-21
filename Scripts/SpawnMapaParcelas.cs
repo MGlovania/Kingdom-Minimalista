@@ -25,7 +25,7 @@ public class SpawnMapaParcelas : MonoBehaviour
         {
             yaSpawneado = 1;
             manager.GetComponent<Mapa>().cantidadArbolesSpawneadosIz += 1;
-            Instantiate(arbol, transform.position, Quaternion.identity);
+            ObjectPool.SpawnObject(arbol, transform.position, Quaternion.identity);
         }
         if (range <= 22 && range >= 16 && manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosIz < 3 && ladoIzquierdo)
         {
@@ -39,17 +39,17 @@ public class SpawnMapaParcelas : MonoBehaviour
             manager.GetComponent<Mapa>().cantidadPlataSpawneadosIz += 1;
             Instantiate(plata, transform.position, Quaternion.identity);
         }
-        if (range <= 31 && range >= 28 && manager.GetComponent<Mapa>().cantidadOroSpawneadosIz < 1 && ladoIzquierdo)
-        {
-            yaSpawneado = 1;
-            manager.GetComponent<Mapa>().cantidadOroSpawneadosIz += 1;
-            Instantiate(oro, transform.position, Quaternion.identity);
-        }
+        //if (range <= 31 && range >= 28 && manager.GetComponent<Mapa>().cantidadOroSpawneadosIz < 1 && ladoIzquierdo)
+        //{
+        //    yaSpawneado = 1;
+        //    manager.GetComponent<Mapa>().cantidadOroSpawneadosIz += 1;
+        //    Instantiate(oro, transform.position, Quaternion.identity);
+        //}
         if (range <= 15 && manager.GetComponent<Mapa>().cantidadArbolesSpawneadosDer < 5 && ladDerecho)
         {
             yaSpawneado = 1;
             manager.GetComponent<Mapa>().cantidadArbolesSpawneadosDer += 1;
-            Instantiate(arbol, transform.position, Quaternion.identity);
+            ObjectPool.SpawnObject(arbol, transform.position, Quaternion.identity);
         }
         if (range <= 22 && range >= 16 && manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer < 3 && ladDerecho)
         {
@@ -63,12 +63,12 @@ public class SpawnMapaParcelas : MonoBehaviour
             manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer += 1;
             Instantiate(plata, transform.position, Quaternion.identity);
         }
-        if (range <= 31 && range >= 28 && manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer < 1 && ladDerecho)
-        {
-            yaSpawneado = 1;
-            manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer += 1;
-            Instantiate(oro, transform.position, Quaternion.identity);
-        }
+        //if (range <= 31 && range >= 28 && manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer < 1 && ladDerecho)
+        //{
+        //    yaSpawneado = 1;
+        //    manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer += 1;
+        //    Instantiate(oro, transform.position, Quaternion.identity);
+        //}
         Invoke(nameof(VerifMapeado), 1f);
     }
     void VerifMapeado()
@@ -78,7 +78,7 @@ public class SpawnMapaParcelas : MonoBehaviour
             if (manager.GetComponent<Mapa>().cantidadArbolesSpawneadosIz < 5 && ladoIzquierdo)
             {
                 manager.GetComponent<Mapa>().cantidadArbolesSpawneadosIz += 1;
-                Instantiate(arbol, transform.position, Quaternion.identity);
+                ObjectPool.SpawnObject(arbol, transform.position, Quaternion.identity);
             }
             else if (manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosIz < 3 && ladoIzquierdo)
             {
@@ -90,15 +90,15 @@ public class SpawnMapaParcelas : MonoBehaviour
                 manager.GetComponent<Mapa>().cantidadPlataSpawneadosIz += 1;
                 Instantiate(plata, transform.position, Quaternion.identity);
             }
-            else if (manager.GetComponent<Mapa>().cantidadOroSpawneadosIz < 1 && ladoIzquierdo)
-            {
-                manager.GetComponent<Mapa>().cantidadOroSpawneadosIz += 1;
-                Instantiate(oro, transform.position, Quaternion.identity);
-            }
+            //else if (manager.GetComponent<Mapa>().cantidadOroSpawneadosIz < 1 && ladoIzquierdo)
+            //{
+            //    manager.GetComponent<Mapa>().cantidadOroSpawneadosIz += 1;
+            //    Instantiate(oro, transform.position, Quaternion.identity);
+            //}
             if (manager.GetComponent<Mapa>().cantidadArbolesSpawneadosDer < 5 && ladDerecho)
             {
                 manager.GetComponent<Mapa>().cantidadArbolesSpawneadosDer += 1;
-                Instantiate(arbol, transform.position, Quaternion.identity);
+                ObjectPool.SpawnObject(arbol, transform.position, Quaternion.identity);
             }
             else if (manager.GetComponent<Mapa>().cantidadPiedrasSpawneadosDer < 3 && ladDerecho)
             {
@@ -110,11 +110,11 @@ public class SpawnMapaParcelas : MonoBehaviour
                 manager.GetComponent<Mapa>().cantidadPlataSpawneadosDer += 1;
                 Instantiate(plata, transform.position, Quaternion.identity);
             }
-            else if (manager.GetComponent<Mapa>().cantidadOroSpawneadosDer < 1 && ladDerecho)
-            {
-                manager.GetComponent<Mapa>().cantidadOroSpawneadosDer += 1;
-                Instantiate(oro, transform.position, Quaternion.identity);
-            }
+            //else if (manager.GetComponent<Mapa>().cantidadOroSpawneadosDer < 1 && ladDerecho)
+            //{
+            //    manager.GetComponent<Mapa>().cantidadOroSpawneadosDer += 1;
+            //    Instantiate(oro, transform.position, Quaternion.identity);
+            //}
         }
        
     }

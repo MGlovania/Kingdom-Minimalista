@@ -51,6 +51,32 @@ public class VerifConstruir : MonoBehaviour
             obstruccionOtraConstruccion = 1;
             gameObject.GetComponent<SpriteRenderer>().color = Color.red;
         }
+       if (collision.CompareTag("Serreria"))
+        {
+            obstruccionOtraConstruccion = 1;
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+        if (collision.CompareTag("Arqueria"))
+        {
+            obstruccionOtraConstruccion = 1;
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+        if (collision.CompareTag("Piedreria"))
+        {
+            obstruccionOtraConstruccion = 1;
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+        if (collision.CompareTag("TorreMagos"))
+        {
+            obstruccionOtraConstruccion = 1;
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+        if (collision.CompareTag("Forja"))
+        {
+            obstruccionOtraConstruccion = 1;
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+
 
     }
     private void OnTriggerExit2D(Collider2D collision)
@@ -67,6 +93,26 @@ public class VerifConstruir : MonoBehaviour
         }
 
         if (collision.CompareTag("Casa"))
+        {
+            obstruccionOtraConstruccion = 0;
+        }
+        if (collision.CompareTag("Serreria"))
+        {
+            obstruccionOtraConstruccion = 0;
+        }
+        if (collision.CompareTag("Arqueria"))
+        {
+            obstruccionOtraConstruccion = 0;
+        }
+        if (collision.CompareTag("Piedreria"))
+        {
+            obstruccionOtraConstruccion = 0;
+        }
+        if (collision.CompareTag("TorreMagos"))
+        {
+            obstruccionOtraConstruccion = 0;
+        }
+        if (collision.CompareTag("Forja"))
         {
             obstruccionOtraConstruccion = 0;
         }

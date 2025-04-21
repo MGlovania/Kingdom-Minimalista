@@ -16,9 +16,13 @@ public class Serrerja : MonoBehaviour
 
     public GameObject posicionMadera;
 
-    public int nivel;
+    public int nivelCasa;
+
+    public bool esSerreria;
+    public bool esPiedreria;
     void Start()
     {
+        nivelCasa = 1;
         posicionMadera = GameObject.FindGameObjectWithTag("PosicionMadera");
         textoPopUpMas2 = GameObject.FindGameObjectWithTag("PopUpMasRecursos");
         manager = GameObject.FindGameObjectWithTag("Manager");
@@ -28,13 +32,23 @@ public class Serrerja : MonoBehaviour
 
     void Spawn()
     {
-        manager.GetComponent<Recursos>().cantidadMadera += 1;
+     
      
         textoPopUpMas.SetActive(false);
         textoPopUpMas.SetActive(true);
         textoPopUpMas2.SetActive(false);
         textoPopUpMas2.SetActive(true);
-        textoPopUpMas2.transform.position = posicionMadera.transform.position + Vector3.right * 90.25f;
+        if (esSerreria)
+        {
+            textoPopUpMas2.transform.position = posicionMadera.transform.position + Vector3.right * 90.25f;
+            manager.GetComponent<Recursos>().cantidadMadera += 1;
+        }
+        if (esPiedreria)
+        {
+            textoPopUpMas2.transform.position = posicionMadera.transform.position + Vector3.right * 90.25f + Vector3.down * 45.5f;
+            manager.GetComponent<Recursos>().cantidadPiedra += 1;
+        }
+       
         textoPopUpMas.GetComponent<TMP_Text>().text = "+" + manager.GetComponent<Recursos>().cantidadRecursosObtenidosDeConstrucciones.ToString("F0");
         textoPopUpMas2.GetComponent<TMP_Text>().text = "+" + manager.GetComponent<Recursos>().cantidadRecursosObtenidosDeConstrucciones.ToString("F0");
         Invoke(nameof(Spawn), time);

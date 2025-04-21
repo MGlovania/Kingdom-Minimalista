@@ -35,9 +35,12 @@ public class Arbol : MonoBehaviour
     public GameObject posicionPopUpMenos;
 
     public GameObject brotePrefab;
+
+    public int puntoMorir;
  
     void OnEnable()
     {
+        puntoMorir = 0;
         textoPopUpMas = GameObject.FindGameObjectWithTag("PopUpMasRecursos");
         textoPopUpMenos = GameObject.FindGameObjectWithTag("PopUpMenosRecursos");
         posicionMadera = GameObject.FindGameObjectWithTag("PosicionMadera");
@@ -62,12 +65,43 @@ public class Arbol : MonoBehaviour
         }
      
     }
-    
+
     void Talar()
     {
-        Invoke(nameof(Talar), timeTalar);
+        if (puntoMorir <= 0)
+        {
+            Invoke(nameof(Talar), timeTalar);
+        }
+
+      
         if (puntoTalar >= 1 && estaJugadorEnColision)
         {
+            range = Random.Range(0, 2);
+            if (range == 0)
+            {
+                if (esArbol)
+                {
+                    AudioManager.instance.PlaySFX("Wood1");
+                }
+                else
+                {
+                    AudioManager.instance.PlaySFX("Rock1");
+                }
+
+            }
+            else
+            {
+                if (esArbol)
+                {
+                    AudioManager.instance.PlaySFX("Wood2");
+                }
+                else
+                {
+                    AudioManager.instance.PlaySFX("Rock2");
+                }
+
+            }
+
             textoPopUpMenos.transform.position = posicionPopUpMenos.transform.position;
             textoPopUpMenos.SetActive(false);
             textoPopUpMenos.SetActive(true);
@@ -114,7 +148,8 @@ public class Arbol : MonoBehaviour
     }
     private void OnDisable()
     {
-        if (esArbol)
+        puntoMorir = 1;
+        if (esArbol && manager != null && manager.GetComponent<BotonesRun>().puntoRetry <= 0 )
         {
             ObjectPool.SpawnObject(brotePrefab, transform.position, Quaternion.identity);
         }

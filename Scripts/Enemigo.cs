@@ -13,6 +13,7 @@ public class Enemigo : MonoBehaviour
 
     public int vida;
     public float speed;
+    public float speedNormal;
     public int daño;
     public float timeDisparo;
 
@@ -43,27 +44,41 @@ public class Enemigo : MonoBehaviour
     public int range;
     public GameObject prefabEscupitajo;
     public GameObject colliderAtacar;
+
+    public GameObject explosion;
+
+   
+    public int cooldownVolverACongelar;
+    public GameObject sp;
+
+    public GameObject dayNight;
+
+    public int puntoMorir;
     void OnEnable()
     {
+        puntoMorir = 0;
         target = null;
         popUpMasVioleta = GameObject.FindGameObjectWithTag("PopUpMasRecursos");
         posicionMadera = GameObject.FindGameObjectWithTag("PosicionMadera");
         player = GameObject.FindGameObjectWithTag("Player");
         manager = GameObject.FindGameObjectWithTag("Manager");
+        dayNight = GameObject.FindGameObjectWithTag("DayNightCycle");
         if (esEnemigoComun)
-        {
-            vida = 2;
+        {         
+            vida = 2 + dayNight.GetComponent<DayNightCycle>().aumentarVidaEnemigoComun;
             speed = 1.85f + Random.Range(0.4f, 0.65f);
-            daño = 11;
+            speedNormal = speed;
+            daño = 1 + dayNight.GetComponent<DayNightCycle>().aumentarDañoEnemigoComun;
             cantidadVioleta = 1;
         }
         if (esEnemigoEscupidor)
         {
-            vida = 2;
+            vida = 2 + dayNight.GetComponent<DayNightCycle>().aumentarVidaEnemigoEscupidor;
             speed = 1.65f + Random.Range(0.35f, 0.6f);
-            daño = 2;
+            speedNormal = speed;
+            daño = 2 + dayNight.GetComponent<DayNightCycle>().aumentarDañoEnemigoEscupidor;
             colliderAtacar.GetComponent<CircleCollider2D>().radius = Random.Range(2.7f, 3.1f);
-            timeDisparo = Random.Range(2.75f, 3.25f);
+            timeDisparo = Random.Range(2.75f - +dayNight.GetComponent<DayNightCycle>().aumentarVelocidadAtaqueEnemigoEscupidor, 3.25f - dayNight.GetComponent<DayNightCycle>().aumentarVelocidadAtaqueEnemigoEscupidor);
          
             cantidadVioleta = 1;
             Invoke(nameof(Disparar), timeDisparo);
@@ -73,21 +88,36 @@ public class Enemigo : MonoBehaviour
     void Disparar()
     {
         puntoSaltar = 0;
-        Invoke(nameof(Disparar), timeDisparo);
+        if (puntoMorir <= 0)
+        {
+            Invoke(nameof(Disparar), timeDisparo);
+        }
+     
         if (target != null && this.gameObject.activeSelf != false)
         {
+            Vector2 direction = (target.transform.position + Vector3.up * Random.Range(4.25f, 6f)) - transform.position;
+           
+            transform.right = direction;
+           
+
             range = Random.Range(0, 3);
             if (range == 0)
             {
                 puntoSaltar = 1;
                 transform.position = Vector3.MoveTowards(transform.position, transform.position + Vector3.up * 2, 95 * Time.deltaTime);
             }
-            GameObject obj = ObjectPool.SpawnObject(prefabEscupitajo, transform.position + Vector3.up / 2f, Quaternion.identity);
-
-            obj.GetComponent<Proyectil>().target = target.transform;
-            obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
-            obj.GetComponent<Proyectil>().esEscupitajo = true;
+            GameObject obj = ObjectPool.SpawnObject(prefabEscupitajo, transform.position + Vector3.up / 2f, Quaternion.identity);      
+            obj.GetComponent<Rigidbody2D>().velocity = transform.right * Random.Range(5f, 10f);
+            obj.GetComponent<ProyectillMenosLag>().target = target.gameObject;
             obj.GetComponent<Escupitajo>().daño = daño;
+
+            transform.rotation = Quaternion.Euler(Vector3.zero);
+
+
+         //   obj.GetComponent<Proyectil>().target = target.transform;
+          //  obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+          //  obj.GetComponent<Proyectil>().esEscupitajo = true;
+          //  obj.GetComponent<Escupitajo>().daño = daño;
 
         }
         if (target != null && target.gameObject.activeSelf == false)
@@ -101,7 +131,19 @@ public class Enemigo : MonoBehaviour
     }
     private void OnDisable()
     {
-        manager.GetComponent<Recursos>().cantidadEnemigos -= 1;
+        puntoMorir = 1;
+        AudioManager.instance.PlaySFX("MorirEnemigo");
+        if (manager.GetComponent<Trinkets>().necroticSelect >= 1)
+        {
+            range = Random.Range(0, 100);
+            if (range <= 0 + (manager.GetComponent<Recursos>().rangeExplosionNecrotic - 1))
+            {
+                ObjectPool.SpawnObject(explosion, transform.position, Quaternion.identity);
+            }
+            
+        }
+            manager.GetComponent<Recursos>().cantidadEnemigosMatados += 1;
+          manager.GetComponent<Recursos>().cantidadEnemigos -= 1;
         popUpMasVioleta.transform.position = posicionMadera.transform.position + Vector3.right * 90.25f + Vector3.down * 175f;
         popUpMasVioleta.SetActive(false);
         popUpMasVioleta.SetActive(true);
@@ -114,6 +156,10 @@ public class Enemigo : MonoBehaviour
 
     void Update()
     {
+        if (speed <= 0)
+        {
+            speed = 0;
+        }
         if (puntoDisparar >= 1 && target == null)
         {
             puntoDisparar = 0;
@@ -141,6 +187,18 @@ public class Enemigo : MonoBehaviour
      
         puntoMoverKnockBack = 0;
     }
+    void QuitarCongelacion()
+    {
+        speed = speedNormal;
+        sp.GetComponent<SpriteRenderer>().color = Color.white;
+       
+        Invoke(nameof(QuitarCD), 1f);
+    }
+    void QuitarCD()
+    {
+       
+        cooldownVolverACongelar = 0;
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Muro"))
@@ -165,15 +223,38 @@ public class Enemigo : MonoBehaviour
 
         }
        
-        if (collision.CompareTag("Flecha") && collision.GetComponent<Proyectil>().puntoProyectilYaImpactado <= 0)
+        if (collision.CompareTag("Flecha") && collision.GetComponent<ProyectillMenosLag>().puntoProyectilYaImpactado <= 0)
         {
-            collision.GetComponent<Proyectil>().puntoProyectilYaImpactado = 1;
+            collision.GetComponent<ProyectillMenosLag>().puntoProyectilYaImpactado = 1;
             Vector2 difference = transform.position - collision.transform.position;
             transform.position = new Vector2(transform.position.x + difference.x * 2, transform.position.y);
             popUpMenosVida.SetActive(false);
             popUpMenosVida.SetActive(true);
-            textoPopUpMenosVida.text = "-" + collision.GetComponent<Proyectil>().daño.ToString("F0");
-            vida -=  collision.GetComponent<Proyectil>().daño;
+            textoPopUpMenosVida.text = "-" + collision.GetComponent<ProyectillMenosLag>().daño.ToString("F0");
+            vida -=  collision.GetComponent<ProyectillMenosLag>().daño;
+        }
+        if (collision.CompareTag("Quemar"))
+        {                    
+            popUpMenosVida.SetActive(false);
+            popUpMenosVida.SetActive(true);
+            textoPopUpMenosVida.text = "-" + (manager.GetComponent<Recursos>().dañoElementalTotal + manager.GetComponent<Recursos>().dañoUniversal + manager.GetComponent<Recursos>().dañoFuego).ToString("F0");
+            vida -= manager.GetComponent<Recursos>().dañoElementalTotal + manager.GetComponent<Recursos>().dañoUniversal + manager.GetComponent<Recursos>().dañoFuego;
+        }
+        if (collision.CompareTag("Escarcha") && cooldownVolverACongelar <= 0)
+        {
+            cooldownVolverACongelar = 1;
+            speed -= 5;
+            Invoke(nameof(QuitarCongelacion), manager.GetComponent<Recursos>().tiempoCongelacion);
+            sp.GetComponent<SpriteRenderer>().color = Color.blue;
+        }
+        if (collision.CompareTag("ExplosionNecrotic"))
+        {
+            Vector2 difference = transform.position - collision.transform.position;
+            transform.position = new Vector2(transform.position.x + difference.x * 1.3f, transform.position.y);
+            popUpMenosVida.SetActive(false);
+            popUpMenosVida.SetActive(true);
+            textoPopUpMenosVida.text = "-" + (manager.GetComponent<Recursos>().dañoFisicoTotal * 2).ToString("F0");
+            vida -= manager.GetComponent<Recursos>().dañoFisicoTotal * 2;
         }
     }
     private void OnTriggerExit2D(Collider2D collision)

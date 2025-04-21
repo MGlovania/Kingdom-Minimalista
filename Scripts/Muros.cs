@@ -23,6 +23,8 @@ public class Muros : MonoBehaviour
     public BoxCollider2D b1;
     public BoxCollider2D b2;
     public int puntoConstruirMuros;
+
+    public int range;
     void Start()
     {
         nivel = 1;
@@ -32,8 +34,11 @@ public class Muros : MonoBehaviour
     }
     void Verif()
     {
+        Invoke(nameof(Verif), 1f);
         if (puntoConstruirMuros >= 1)
         {
+            b1.enabled = true;
+            b2.enabled = true;
             puntoConstruirMuros = 0;
 
             if (nivel == 1)
@@ -80,8 +85,12 @@ public class Muros : MonoBehaviour
     {
         if (collision.CompareTag("Enemigo"))
         {
-            if(collision.GetComponent<Enemigo>().esEnemigoEscupidor != true)
+          
+            if (collision.GetComponent<Enemigo>().esEnemigoEscupidor != true)
             {
+               
+                    AudioManager.instance.PlaySFX("Wall1");
+            
                 menosVida = collision.GetComponent<Enemigo>().daño;
                 textoMenosVida.SetActive(false);
                 textoMenosVida.SetActive(true);
@@ -92,7 +101,9 @@ public class Muros : MonoBehaviour
         }
         if (collision.CompareTag("Escupitajo"))
         {
-           
+          
+                AudioManager.instance.PlaySFX("Wall1");
+          
             menosVida = collision.GetComponent<Escupitajo>().daño;
                 textoMenosVida.SetActive(false);
                 textoMenosVida.SetActive(true);

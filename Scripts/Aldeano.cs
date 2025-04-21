@@ -23,6 +23,8 @@ public class Aldeano : MonoBehaviour
     public Sprite pantalon10;
     public Sprite pantalon11;
 
+   
+
     public GameObject cuerpo1;
     public GameObject cuerpo2;
 
@@ -38,6 +40,9 @@ public class Aldeano : MonoBehaviour
 
     public bool esAldeanoSinEmpleo;
     public bool esAldeanoArquero;
+    public bool esAldeanoMago;
+    public GameObject prefabBolaFuego;
+    public GameObject prefabEscarcha;
 
     public GameObject manager;
     public GameObject dayNight;
@@ -55,21 +60,28 @@ public class Aldeano : MonoBehaviour
     public Transform target;
 
 
-    public AnimationCurve animCurve;
-    public AnimationCurve axisCorrectionAnimCurve;
+  //  public AnimationCurve animCurve;
+ //   public AnimationCurve axisCorrectionAnimCurve;
 
     public int dañoArquero;
-    public float timeDisparo;
+
+    public int vida;
+
+    public GameObject particulasMorir;
+
+    public GameObject player;
+
     void OnEnable()
     {
+        vida = 2;
         target = null;
         puntoPosIz = 0;
         puntoPosDer = 0;
         esAldeanoSinEmpleo = true;
         esAldeanoArquero = false;
-        timeDisparo = 2f;
-        dañoArquero = 1;
-          dayNight = GameObject.FindGameObjectWithTag("DayNightCycle");
+        esAldeanoMago = false;
+        player = GameObject.FindGameObjectWithTag("Player");
+        dayNight = GameObject.FindGameObjectWithTag("DayNightCycle");
         posIz = GameObject.FindGameObjectWithTag("AldeanosPosIz");
         posDer = GameObject.FindGameObjectWithTag("AldeanosPosDer");
         manager = GameObject.FindGameObjectWithTag("Manager");
@@ -142,26 +154,53 @@ public class Aldeano : MonoBehaviour
         {
             cuerpo2.GetComponent<SpriteRenderer>().sprite = pantalon11;
         }
-        Invoke(nameof(Disparar), timeDisparo);
+      
         Invoke(nameof(Verif), 1);
         Invoke(nameof(MoverAleatorio), Random.Range(1f, 5f));
-        range = Random.Range(0, 2);
+        range = Random.Range(0, 3);
         if (range == 0)
         {
             Invoke(nameof(Arqueros), 0.5f);
         }
         if (range == 1)
         {
+            Invoke(nameof(Magos), 0.5f);
+        }
+        if (range == 2)
+        {
             Invoke(nameof(Nada), 0.5f);
         }
-
+      
     }
     void Verif()
     {
+        if (player.GetComponent<Player>().puntoMorir >= 1)
+        {
+            ObjectPool.ReturnObjectToPool(gameObject);
+        }
+      //verif nuevos targets
+        if (gameObject.GetComponent<CircleCollider2D>().enabled)
+        {
+            gameObject.GetComponent<CircleCollider2D>().enabled = false;
+        }
+        else
+        {
+            gameObject.GetComponent<CircleCollider2D>().enabled = true;
+        }
+
         Invoke(nameof(Verif), 1);
+        if (esAldeanoArquero)
+        {
+            dañoArquero = manager.GetComponent<Recursos>().dañoFisicoTotal + manager.GetComponent<Recursos>().dañoUniversal;
+        }
+        if (esAldeanoMago)
+        {
+            dañoArquero = manager.GetComponent<Recursos>().dañoElementalTotal + manager.GetComponent<Recursos>().dañoUniversal;
+        }
+       
         if (dayNight.GetComponent<DayNightCycle>().deNoche == 1)
         {
-            if (esAldeanoArquero && puntoDeNoche <= 0)
+            if (!esAldeanoSinEmpleo && puntoDeNoche <= 0)
             {
                 puntoMover = 0;
                 puntoDeNoche = 1;
@@ -198,57 +237,193 @@ public class Aldeano : MonoBehaviour
                 manager.GetComponent<Recursos>().cantidadAldeanosDer -= 1;
             }
             puntoDeNoche = 0;
-           
+            vida = 2;
+        }
+        if (dayNight.GetComponent<DayNightCycle>().puntoDiaFinalAldeanos >= 1)
+        {
+         
+                transform.position = Vector3.MoveTowards(transform.position, transform.position + Vector3.up * 2, 95 * Time.deltaTime);
+        
         }
     }
+   
     void Arqueros()
     {
         if (manager.GetComponent<Recursos>().cantidadArquerosActual < manager.GetComponent<Recursos>().cantidadArquerosMax)
         {
+            Invoke(nameof(Disparar), manager.GetComponent<Recursos>().timeDisparoArqueros);
             esAldeanoArquero = true;
             esAldeanoSinEmpleo = false;
             manager.GetComponent<Recursos>().cantidadArquerosActual += 1;
             manager.GetComponent<Recursos>().arqueriaAumentarNumero += 1;
         }
-        range = Random.Range(0, 2);
-        if (range == 0 && esAldeanoArquero == false)
+        range = Random.Range(0, 3);
+        if (range == 0 && !esAldeanoArquero && !esAldeanoMago)
         {
             Invoke(nameof(Arqueros), 0.5f);
         }
-        if (range == 1)
+       else if (range == 1 && !esAldeanoArquero && !esAldeanoMago)
+        {
+            Invoke(nameof(Magos), 0.5f);
+        }
+        else if (range == 2)
+        {
+            Invoke(nameof(Nada), 0.5f);
+        }
+    }
+    void Magos()
+    {
+        if (manager.GetComponent<Recursos>().cantidadMagosActual < manager.GetComponent<Recursos>().cantidadMagosMax)
+        {
+            Invoke(nameof(Disparar), manager.GetComponent<Recursos>().timeDisparoMagos);
+            esAldeanoMago = true;
+            esAldeanoSinEmpleo = false;
+            manager.GetComponent<Recursos>().cantidadMagosActual += 1;
+            manager.GetComponent<Recursos>().magosAumentarNumero += 1;
+        }
+        range = Random.Range(0, 3);
+        if (range == 0 && !esAldeanoArquero && !esAldeanoMago)
+        {
+            Invoke(nameof(Arqueros), 0.5f);
+        }
+        else if (range == 1 && !esAldeanoMago && !esAldeanoMago)
+        {
+            Invoke(nameof(Magos), 0.5f);
+        }
+        else if (range == 2)
         {
             Invoke(nameof(Nada), 0.5f);
         }
     }
     void Nada()
     {
-        range = Random.Range(0, 2);
-        if (range == 0 && esAldeanoArquero == false)
+        range = Random.Range(0, 3);
+        if (range == 0 && !esAldeanoArquero && !esAldeanoMago)
         {
             Invoke(nameof(Arqueros), 0.5f);
         }
-        if (range == 1)
+        else if (range == 1 && !esAldeanoMago && !esAldeanoMago)
+        {
+            Invoke(nameof(Magos), 0.5f);
+        }
+        else if (range == 2)
         {
             Invoke(nameof(Nada), 0.5f);
         }
     }
+
+  
     void Disparar()
     {
+      
         puntoSaltar = 0;
-        Invoke(nameof(Disparar), timeDisparo);
-        if (target != null && esAldeanoArquero)
+        if (esAldeanoArquero)
         {
+            Invoke(nameof(Disparar), manager.GetComponent<Recursos>().timeDisparoArqueros);
+        }
+        if (esAldeanoMago)
+        {
+            Invoke(nameof(Disparar), manager.GetComponent<Recursos>().timeDisparoMagos);
+        }
+      
+        if (target != null && manager.GetComponent<Trinkets>().cincuentaSelect >= 1)
+        {
+            range = Random.Range(0, 100);
+            if (range <= 0 + (manager.GetComponent<Recursos>().rangeDobleAtaqueCincuenta - 1))
+            {
+                Invoke(nameof(DisparoDoble), 0.25f);
+            }
+        }
+        else if (target != null && manager.GetComponent<Trinkets>().glassSelect >= 1)
+        {
+            range = Random.Range(0, 100);
+            if (range <= 0 + (manager.GetComponent<Recursos>().rangeDobleAtaqueGlass - 1))
+            {
+                Invoke(nameof(DisparoDoble), 0.25f);
+            }
+        }
+        // cañones = vectorup random 15-25
+        if (target != null)
+        {
+           
             range = Random.Range(0, 3);
             if (range == 0)
             {
                 puntoSaltar = 1;
                 transform.position = Vector3.MoveTowards(transform.position, transform.position + Vector3.up * 2, 95 * Time.deltaTime);
             }
-            GameObject obj = ObjectPool.SpawnObject(proyPrefab, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+            if (esAldeanoArquero)
+            {
+                AudioManager.instance.PlaySFX("Arrow1");
+                Vector2 direction = (target.transform.position + Vector3.up * Random.Range(4.25f, 6f)) - transform.position;
+                
+                transform.right = direction;
+                
+              
+                if (manager.GetComponent<Trinkets>().goliathSelect >= 1)
+                {
+                    range = Random.Range(0, 100);
+                    if (range <= 0 + manager.GetComponent<Recursos>().rangeFlechaGoliath - 1)
+                    {
+                        GameObject obj = ObjectPool.SpawnObject(proyPrefab, spawnPoint.transform.position + Vector3.up / 1.5f, Quaternion.identity);
+                        obj.GetComponent<Rigidbody2D>().velocity = transform.right * Random.Range(5f, 10f);
+                        obj.GetComponent<ProyectillMenosLag>().target = target.gameObject;
+                        obj.GetComponent<ProyectillMenosLag>().daño = dañoArquero;
+                        obj.GetComponent<ProyectillMenosLag>().puntoGoliath = 1;
+                    }
+                    else
+                    {
+                        GameObject obj2 = ObjectPool.SpawnObject(proyPrefab, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                        obj2.GetComponent<Rigidbody2D>().velocity = transform.right * Random.Range(5f, 10f);
+                        obj2.GetComponent<ProyectillMenosLag>().target = target.gameObject;
+                        obj2.GetComponent<ProyectillMenosLag>().daño = dañoArquero;
+                    }
+                }
+                else
+                {
+                    GameObject obj = ObjectPool.SpawnObject(proyPrefab, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                    obj.GetComponent<Rigidbody2D>().velocity = transform.right * Random.Range(5f, 10f);
+                    obj.GetComponent<ProyectillMenosLag>().target = target.gameObject;
+                    obj.GetComponent<ProyectillMenosLag>().daño = dañoArquero;
+                }
+                transform.rotation = Quaternion.Euler(Vector3.zero);
 
-            obj.GetComponent<Proyectil>().target = target.transform;
-            obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
-            obj.GetComponent<Proyectil>().daño = dañoArquero;
+                //cosa de proyectil del que genera ligeramente mas lag
+                //  obj.GetComponent<Proyectil>().target = target.transform;
+                //  obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+                //  obj.GetComponent<Proyectil>().daño = dañoArquero;
+
+
+
+            }
+            else if (esAldeanoMago)
+            {
+                AudioManager.instance.PlaySFX("Spell1");
+                range = Random.Range(0, 2);
+                if (range == 0)
+                {
+                  
+                        GameObject obj = ObjectPool.SpawnObject(prefabBolaFuego, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                        //obj.GetComponent<Proyectil>().target = target.transform;
+                        //obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+                        //obj.GetComponent<Proyectil>().daño = dañoArquero;
+                    
+                   
+                }
+                else if (range == 1)
+                {
+                     GameObject obj = ObjectPool.SpawnObject(prefabEscarcha, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                        //obj.GetComponent<Proyectil>().target = target.transform;
+                        //obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+                        //obj.GetComponent<Proyectil>().daño = dañoArquero;
+                 
+                }
+            
+               
+            }
+           
+
+        
         }
         if (target != null && target.gameObject.activeSelf == false)
         {
@@ -258,6 +433,40 @@ public class Aldeano : MonoBehaviour
       
 
 
+    }
+    void DisparoDoble()
+    {
+        if (esAldeanoArquero)
+        {
+            GameObject obj = ObjectPool.SpawnObject(proyPrefab, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+
+            //obj.GetComponent<Proyectil>().target = target.transform;
+            //obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+            //obj.GetComponent<Proyectil>().daño = dañoArquero;
+        }
+        if (esAldeanoMago)
+        {
+            range = Random.Range(0, 2);
+            if (range == 0)
+            {
+
+                GameObject obj = ObjectPool.SpawnObject(prefabBolaFuego, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                //obj.GetComponent<Proyectil>().target = target.transform;
+                //obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+                //obj.GetComponent<Proyectil>().daño = dañoArquero;
+
+
+            }
+            else if (range == 1)
+            {
+                GameObject obj = ObjectPool.SpawnObject(prefabEscarcha, spawnPoint.transform.position + Vector3.up / 2f, Quaternion.identity);
+                //obj.GetComponent<Proyectil>().target = target.transform;
+                //obj.GetComponent<Proyectil>().InitializeAnimationCurve(animCurve, axisCorrectionAnimCurve);
+                //obj.GetComponent<Proyectil>().daño = dañoArquero;
+
+            }
+        }
+      
     }
     void MoverAleatorio()
     {
@@ -299,7 +508,11 @@ public class Aldeano : MonoBehaviour
     void Update()
     {
 
-
+        if (vida <= 0)
+        {
+            AudioManager.instance.PlaySFX("DañoAliado");
+            ObjectPool.ReturnObjectToPool(gameObject);
+        }
         if (moverDerecha == 1 && puntoMover >= 1 && moverHaciaElCentro <= 0)
         {
 
@@ -338,6 +551,7 @@ public class Aldeano : MonoBehaviour
     }
     private void OnDisable()
     {
+        ObjectPool.SpawnObject(particulasMorir, transform.position, Quaternion.identity);
         manager.GetComponent<Recursos>().cantidadAldeanos -= 1;
         if (puntoPosIz >= 1)
         {
@@ -348,16 +562,23 @@ public class Aldeano : MonoBehaviour
         {
             manager.GetComponent<Recursos>().cantidadAldeanosDer -= 1;
         }
-       
-        manager.GetComponent<Recursos>().cantidadArquerosActual -= 1;
-        manager.GetComponent<Recursos>().arqueriaDisminuirNumero += 1;
+        if (esAldeanoArquero)
+        {
+            manager.GetComponent<Recursos>().cantidadArquerosActual -= 1;
+            manager.GetComponent<Recursos>().arqueriaDisminuirNumero += 1;
+        }
+        if (esAldeanoMago)
+        {
+            manager.GetComponent<Recursos>().cantidadMagosActual -= 1;
+            manager.GetComponent<Recursos>().magosDisminuirNumero += 1;
+        }
+     
     }
     void QuitarCentro()
     {
         moverHaciaElCentro = 0;
     }
    
-  
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Enemigo"))
@@ -370,11 +591,11 @@ public class Aldeano : MonoBehaviour
             moverHaciaElCentro = 1;
             Invoke(nameof(QuitarCentro), 1.5f);
         }
-        if (collision.CompareTag("Escupitajo"))
+        if (collision.CompareTag("Escupitajo") && collision.GetComponent<ProyectillMenosLag>().puntoProyectilYaImpactado <= 0)
         {
-
-         
-            ObjectPool.ReturnObjectToPool(gameObject);
+            AudioManager.instance.PlaySFX("DañoAliado");
+            collision.GetComponent<ProyectillMenosLag>().puntoProyectilYaImpactado = 1;
+            vida -= 1;
 
         }
     }
